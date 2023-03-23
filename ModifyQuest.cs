@@ -29,7 +29,7 @@ namespace MHFQuestToMH2Dos
                     target[i] = src[i];
                 }
 
-                //清除无意义数据
+                //清除对于2Dos来说 无意义的数据
                 target[fixindex_1] = 0x00;
 
                 string IntPtrHex = "";
@@ -46,24 +46,33 @@ namespace MHFQuestToMH2Dos
                         IntPtrHex += target[i].ToString("X");
                 }
 
+
+                //从前4字节取出指针 定位任务信息位置
                 long PtrIndex = HexHelper.HexaToDecimal(IntPtrHex);
 
+                //MHF偏移12的位置
                 long MoveStarPtr = PtrIndex + Offset;
+                //目标2Dos偏移8的位置
+                long targetStarPtr = PtrIndex + Offset_2nd;
 
+
+                //取出原始数据
                 byte[] temp = new byte[moveLenght];
                 for (int i = 0; i < moveLenght; i++)
                 {
                     temp[i] = target[MoveStarPtr + i];
-                    target[MoveStarPtr + i] = 0x00;
                 }
 
-                long targetStarPtr = PtrIndex + Offset_2nd;
-
+                //清理原始数据
+                for (int i = 0; i < moveLenght; i++)
+                {
+                    target[MoveStarPtr + i] = 0x00;
+                }
+                //将temp数据往前位移4字节
                 for (int i = 0; i < moveLenght; i++)
                 {
                     target[targetStarPtr + i] = temp[i];
                 }
-
                 return true;
             }
             catch (Exception ex)

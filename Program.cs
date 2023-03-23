@@ -26,23 +26,31 @@
             string[] files = FileHelper.GetDirFile(loc + InDir);
 
             int index= 0;
+            int errcount = 0;
             for(int i = 0;i < files.Length;i++) 
             {
-                string FileName = files[0].Substring(files[0].LastIndexOf("\\"));
+                string FileName = files[i].Substring(files[i].LastIndexOf("\\"));
                 if (!FileName.ToLower().Contains(".mib") && !FileName.ToLower().Contains(".bin"))
                 {
                     return;
                 }
                 index++;
                 FileHelper.LoadFile(files[i], out byte[] data);
-                ModifyQuest.ModifyFile(data, out byte[] targetdata);
-                string newfileName = FileName + "_unpack";
-                string outstring = loc + OutDir + "\\" + newfileName;
-                FileHelper.SaveFile(outstring, targetdata);
-                Console.WriteLine($"已处理第{index}个:{outstring}");
+                if (ModifyQuest.ModifyFile(data, out byte[] targetdata))
+                {
+                    string newfileName = FileName + "_unpack";
+                    string outstring = loc + OutDir + "\\" + newfileName;
+                    FileHelper.SaveFile(outstring, targetdata);
+                    Console.WriteLine($"成功已处理 第{index}个:{outstring}");
+                }
+                else
+                {
+                    errcount++;
+                    Console.WriteLine($"处理失败 第{index}个:{files[i]}");
+                }
             }
 
-            Console.WriteLine($"需处理{files.Length}个文件");
+            Console.WriteLine($"需处理{files.Length}个文件，其中{errcount}个失败");
             Console.ReadLine();
         }
     }
