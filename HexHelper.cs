@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,46 @@ namespace MHFQuestToMH2Dos
 {
     public class HexHelper
     {
+
+        /**  
+        * byte[]转换int byte高位在前
+        */
+        public static int bytesToInt(byte[] src,int lenght, int offset = 0)
+        {
+            if (lenght == 1)
+                return src[offset + 0];
+
+            byte[] data = new byte[lenght];
+            for (int i = 0; i < lenght; i++)
+            {
+                data[i] = src[offset + i];
+            }
+            return BitConverter.ToInt32(data, 0);
+        }
+
+        /**  
+        * int 转 byte[] byte高位在前
+        */
+        public static byte[] intToBytes(int value)
+        {
+            return BitConverter.GetBytes(value);
+        }
+
+        /**  
+        * 写入int到byte[] byte高位在前
+        */
+        public static void ModifyIntHexToBytes(byte[] srcdata, int targetvalue,int startoffset, int srclenght)
+        {
+            byte[] targetVal = intToBytes(targetvalue);
+
+            //抹去数据
+            for (int i = 0; i < srclenght; i++)
+                srcdata[startoffset + i] = 0x00;
+
+            for (int i = 0; i < targetVal.Length && i < srclenght; i++)
+                srcdata[startoffset + i] = targetVal[i];
+        }
+
         /// <summary>
         /// 另一种16进制转10进制的处理方式，Multiplier参与*16的循环很巧妙，对Multiplier的处理很推荐，逻辑统一
         /// </summary>

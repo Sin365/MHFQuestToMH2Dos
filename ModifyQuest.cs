@@ -11,68 +11,116 @@ namespace MHFQuestToMH2Dos
         /// <summary>
         /// Dos中无意义数据
         /// </summary>
-        const int fixindex_1 = 19;
+        const int cNon0x00For2DosPtr = 19;
+        /// <summary>
+        /// MHF任务信息偏移
+        /// </summary>
+        const int cQuestMHFOffset = 12;
+        /// <summary>
+        /// 2Dos任务信息偏移
+        /// </summary>
+        const int cQuest2DosOffset = 8;
+        /// <summary>
+        /// 任务信息长度
+        /// </summary>
+        const int cQuestInfoLenght = 64;
+        /// <summary>
+        /// 任务_类型 偏移
+        /// </summary>
+        const int cQuestInfo_Type_Offset = 0;
+        /// <summary>
+        /// 任务_类型 长度
+        /// </summary>
+        const int cQuestInfo_Type_Lenght = 1;
+        /// <summary>
+        /// 任务_类型 偏移
+        /// </summary>
+        const int cQuestInfo_TargetMap_Offset = 32;
+        /// <summary>
+        /// 任务_类型 长度
+        /// </summary>
+        const int cQuestInfo_TargetMapID_Lenght = 1;
 
-        const int Offset = 12;
-        const int Offset_2nd = 8;
+        public static bool ModifyQuset(byte[] src, out byte[] target)
+        {
+            target = null;
 
-        const int moveLenght = 64;
+            if (!ModifyFileOffset(src, out byte[] Setp1out))
+                return false;
 
-        public static bool ModifyFile(byte[] src,out byte[] target)
+            if (!ModifyQuestMap(Setp1out, out byte[] Setp2out))
+                return false;
+
+            target = Setp2out;
+            return true;
+        }
+
+
+        public static bool ModifyFileOffset(byte[] src, out byte[] target)
         {
             try
             {
+                //加载数据
                 target = new byte[src.Length];
-
                 for (int i = 0; i < src.Length; i++)
-                {
                     target[i] = src[i];
-                }
-
-                //清除对于2Dos来说 无意义的数据
-                target[fixindex_1] = 0x00;
-
-                string IntPtrHex = "";
-                bool flag = false;
-
-                for (int i = 3; i >= 0; i--)
-                {
-                    if (target[i] != 0x00)
-                        flag = true;
-
-                    if (flag)
-                        IntPtrHex += target[i].ToString("X");
-                    else if (target[i] != 0x00)
-                        IntPtrHex += target[i].ToString("X");
-                }
-
 
                 //从前4字节取出指针 定位任务信息位置
-                long PtrIndex = HexHelper.HexaToDecimal(IntPtrHex);
+                int _QuestInfoPtr = HexHelper.bytesToInt(target, 4, 0x00);
 
+                //----Step---- 清除对于2Dos来说 无意义的数据
+                target[cNon0x00For2DosPtr] = 0x00;
+
+                //----Step---- 前移任务数据4字节 （MHF比2Dos后移了4字节，MHF：+12 2Dos： +8）
                 //MHF偏移12的位置
-                long MoveStarPtr = PtrIndex + Offset;
+                long QuestInfoPtr_MHFTarget = _QuestInfoPtr + cQuestMHFOffset;
                 //目标2Dos偏移8的位置
-                long targetStarPtr = PtrIndex + Offset_2nd;
-
-
+                long QuestInfoPtr_2DosTarget = _QuestInfoPtr + cQuest2DosOffset;
                 //取出原始数据
-                byte[] temp = new byte[moveLenght];
-                for (int i = 0; i < moveLenght; i++)
+                byte[] temp = new byte[cQuestInfoLenght];
+                for (int i = 0; i < cQuestInfoLenght; i++)
                 {
-                    temp[i] = target[MoveStarPtr + i];
+                    temp[i] = target[QuestInfoPtr_MHFTarget + i];
                 }
-
                 //清理原始数据
-                for (int i = 0; i < moveLenght; i++)
+                for (int i = 0; i < cQuestInfoLenght; i++)
                 {
-                    target[MoveStarPtr + i] = 0x00;
+                    target[QuestInfoPtr_MHFTarget + i] = 0x00;
                 }
                 //将temp数据往前位移4字节
-                for (int i = 0; i < moveLenght; i++)
+                for (int i = 0; i < cQuestInfoLenght; i++)
                 {
-                    target[targetStarPtr + i] = temp[i];
+                    target[QuestInfoPtr_2DosTarget + i] = temp[i];
                 }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                target = null;
+                return false;
+            }
+        }
+
+
+        public static bool ModifyQuestMap(byte[] src, out byte[] target)
+        {
+            try
+            {
+                //加载数据
+                target = new byte[src.Length];
+                for (int i = 0; i < src.Length; i++)
+                    target[i] = src[i];
+
+                //从前4字节取出指针 定位任务信息位置
+                int _QuestInfoPtr = HexHelper.bytesToInt(target, 4, 0x00);
+
+                //----Step---- 读取任务数据
+                //任务类型
+                int _QuestType = HexHelper.bytesToInt(target, cQuestInfo_Type_Lenght, _QuestInfoPtr + cQuestInfo_Type_Offset);
+                int _QuestTargetMapID = HexHelper.bytesToInt(target, cQuestInfo_TargetMapID_Lenght, _QuestInfoPtr + cQuestInfo_TargetMap_Offset);
+
                 return true;
             }
             catch (Exception ex)

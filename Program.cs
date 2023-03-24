@@ -36,7 +36,7 @@
                 }
                 index++;
                 FileHelper.LoadFile(files[i], out byte[] data);
-                if (ModifyQuest.ModifyFile(data, out byte[] targetdata))
+                if (ModifyQuest.ModifyQuset(data, out byte[] targetdata))
                 {
                     string newfileName = FileName + "_fix";
                     string outstring = loc + OutDir + "\\" + newfileName;
