@@ -32,13 +32,13 @@
                 string FileName = files[i].Substring(files[i].LastIndexOf("\\"));
                 if (!FileName.ToLower().Contains(".mib") && !FileName.ToLower().Contains(".bin"))
                 {
-                    return;
+                    continue;
                 }
                 index++;
                 FileHelper.LoadFile(files[i], out byte[] data);
                 if (ModifyQuest.ModifyFile(data, out byte[] targetdata))
                 {
-                    string newfileName = FileName + "_unpack";
+                    string newfileName = FileName + "_fix";
                     string outstring = loc + OutDir + "\\" + newfileName;
                     FileHelper.SaveFile(outstring, targetdata);
                     Console.WriteLine($"成功已处理 第{index}个:{outstring}");
