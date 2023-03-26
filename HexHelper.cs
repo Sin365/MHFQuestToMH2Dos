@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -9,6 +10,16 @@ namespace MHFQuestToMH2Dos
 {
     public class HexHelper
     {
+
+        public static byte[] CopyByteArr(byte[] src)
+        {
+            byte[] target = new byte[src.Length];
+            //加载数据
+            target = new byte[src.Length];
+            for (int i = 0; i < src.Length; i++)
+                target[i] = src[i];
+            return target;
+        }
 
         /**  
         * byte[]转换int byte高位在前
@@ -23,7 +34,31 @@ namespace MHFQuestToMH2Dos
             {
                 data[i] = src[offset + i];
             }
-            return BitConverter.ToInt32(data, 0);
+
+            if(lenght == 2)
+                return BitConverter.ToInt16(data, 0);
+            else //if (lenght == 4)
+                return BitConverter.ToInt32(data, 0);
+        }
+
+        /**  
+        * byte[]转换int byte高位在前
+        */
+        public static uint bytesToUInt(byte[] src, int lenght, int offset = 0)
+        {
+            if (lenght == 1)
+                return src[offset + 0];
+
+            byte[] data = new byte[lenght];
+            for (int i = 0; i < lenght; i++)
+            {
+                data[i] = src[offset + i];
+            }
+
+            if (lenght == 2)
+                return BitConverter.ToUInt16(data, 0);
+            else //if (lenght == 4)
+                return BitConverter.ToUInt32(data, 0);
         }
 
         /**  
@@ -32,6 +67,41 @@ namespace MHFQuestToMH2Dos
         public static byte[] intToBytes(int value)
         {
             return BitConverter.GetBytes(value);
+        }
+
+        /**  
+        * 从字节读取字符串
+        */
+        public static string ReadBytesToString(byte[] src, int Start, Encoding encoding = null)
+        {
+            List<byte> bytes = new List<byte>();
+
+            int index = 0;
+            while (true)
+            {
+                bytes.Add(src[Start + index]);
+
+                if (src[Start + index + 1] == 0x00)
+                    break;
+
+                index++;
+            }
+            if (encoding == null)
+                encoding = Encoding.GetEncoding("Shift-JIS");
+            string str = encoding.GetString(bytes.ToArray());
+            return str;
+        }
+
+
+        /**  
+        * 从字节读取字符串
+        */
+        public static string ReadBytesToString(byte[] src, Encoding encoding = null)
+        {
+            if (encoding == null)
+                encoding = Encoding.GetEncoding("Shift-JIS");
+            string str = encoding.GetString(src.ToArray());
+            return str;
         }
 
         /**  

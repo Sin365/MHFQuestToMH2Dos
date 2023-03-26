@@ -1,4 +1,6 @@
-﻿namespace MHFQuestToMH2Dos
+﻿using System.Text;
+
+namespace MHFQuestToMH2Dos
 {
     internal class Program
     {
@@ -9,6 +11,7 @@
 
         static void Main(string[] args)
         {
+            Console.Title = "MHFQuestToMH2Dos By 皓月云 axibug.com";
             if (!Directory.Exists(loc + InDir))
             {
                 Console.WriteLine("Input文件不存在");
@@ -23,6 +26,9 @@
                 return;
             }
 
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); 
+
+
             string[] files = FileHelper.GetDirFile(loc + InDir);
 
             int index= 0;
@@ -30,6 +36,8 @@
             for(int i = 0;i < files.Length;i++) 
             {
                 string FileName = files[i].Substring(files[i].LastIndexOf("\\"));
+
+                Console.WriteLine($">>>>>>>>>>>>>>开始处理{FileName}<<<<<<<<<<<<<<<<<<<");
                 if (!FileName.ToLower().Contains(".mib") && !FileName.ToLower().Contains(".bin"))
                 {
                     continue;
@@ -41,16 +49,16 @@
                     string newfileName = FileName + "_fix";
                     string outstring = loc + OutDir + "\\" + newfileName;
                     FileHelper.SaveFile(outstring, targetdata);
-                    Console.WriteLine($"成功已处理 第{index}个:{outstring}");
+                    Console.WriteLine($">>>>>>>>>>>>>>成功已处理 第{index}个:{outstring}");
                 }
                 else
                 {
                     errcount++;
-                    Console.WriteLine($"处理失败 第{index}个:{files[i]}");
+                    Console.WriteLine($">>>>>>>>>>>>>>处理失败 第{index}个:{files[i]}");
                 }
             }
 
-            Console.WriteLine($"需处理{files.Length}个文件，其中{errcount}个失败");
+            Console.WriteLine($"已处理{files.Length}个文件，其中{errcount}个失败");
             Console.ReadLine();
         }
     }
