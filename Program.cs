@@ -8,10 +8,14 @@ namespace MHFQuestToMH2Dos
 
         const string InDir = "Input";
         const string OutDir = "Out";
+        const string Ver = "0.2.1";
 
         static void Main(string[] args)
         {
-            Console.Title = "MHFQuestToMH2Dos By 皓月云 axibug.com";
+            string title = $"MHFQuestToMH2Dos Ver.{Ver} By 皓月云 axibug.com";
+            Console.Title = title;
+            Console.WriteLine(title);
+
             if (!Directory.Exists(loc + InDir))
             {
                 Console.WriteLine("Input文件不存在");
@@ -30,6 +34,12 @@ namespace MHFQuestToMH2Dos
 
 
             string[] files = FileHelper.GetDirFile(loc + InDir);
+            Console.WriteLine($"共{files.Length}个文件，是否处理? (y/n)");
+
+
+            string yn = Console.ReadLine();
+            if (yn.ToLower() != "y")
+                return;
 
             int index= 0;
             int errcount = 0;
@@ -37,24 +47,25 @@ namespace MHFQuestToMH2Dos
             {
                 string FileName = files[i].Substring(files[i].LastIndexOf("\\"));
 
-                Console.WriteLine($">>>>>>>>>>>>>>开始处理{FileName}<<<<<<<<<<<<<<<<<<<");
                 if (!FileName.ToLower().Contains(".mib") && !FileName.ToLower().Contains(".bin"))
                 {
                     continue;
                 }
                 index++;
+
+                Console.WriteLine($">>>>>>>>>>>>>>开始处理 第{index}个文件  {FileName}<<<<<<<<<<<<<<<<<<<");
                 FileHelper.LoadFile(files[i], out byte[] data);
                 if (ModifyQuest.ModifyQuset(data, out byte[] targetdata))
                 {
                     string newfileName = FileName + "_fix";
                     string outstring = loc + OutDir + "\\" + newfileName;
                     FileHelper.SaveFile(outstring, targetdata);
-                    Console.WriteLine($">>>>>>>>>>>>>>成功已处理 第{index}个:{outstring}");
+                    Console.WriteLine($">>>>>>>>>>>>>>成功处理 第{index}个:{outstring}");
                 }
                 else
                 {
                     errcount++;
-                    Console.WriteLine($">>>>>>>>>>>>>>处理失败 第{index}个:{files[i]}");
+                    Console.WriteLine($">>>>>>>>>>>>>>处理失败 第{index}个: 输出到{files[i]}");
                 }
             }
 

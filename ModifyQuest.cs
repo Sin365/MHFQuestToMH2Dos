@@ -13,8 +13,15 @@ namespace MHFQuestToMH2Dos
         const int cMax_MonsterID = 0x49;
         const int cMax_ItemID = 0x031D;
 
-        const int cMax_GuTi = 0x14;
+        const int cMax_GuTi = 0xA;
         const int cMax_QuestStar = 8;
+
+        const int cModify_QuestID = 0xEA74;
+
+        /// <summary>
+        /// 道具ID超出最大限制时，修改为【不可燃烧的废物】
+        /// </summary>
+        const int cModify_OutOfItemID = 0x00AE;
 
         /// <summary>
         /// Dos中无意义数据
@@ -279,7 +286,7 @@ namespace MHFQuestToMH2Dos
                 //整个长度
                 int QuestContenAllLenght = QuestQuestMsgPtr_CurrIndex - _QuestNametPtr;
 
-                Log.HexInfo(_QuestContentPtr, "确定【文本组】结束位置{0}，整个长度{1}", _QuestNametPtr, QuestContenAllLenght);
+                Log.HexInfo(QuestQuestMsgPtr_CurrIndex, "确定【文本组】结束位置{0}，整个长度{1}", _QuestNametPtr, QuestContenAllLenght);
 
                 Log.HexInfo(_QuestNametPtr, "取出【任务文本】原始数据");
                 //取出原始数据
@@ -366,7 +373,16 @@ namespace MHFQuestToMH2Dos
 
                 //任务星
                 int _QuestStart = HexHelper.bytesToInt(target, cQuestInfo_Star_Lenght, _QuestInfoPtr + cQuestInfo_Star_Offset);
-                Log.HexColor(ConsoleColor.Magenta,_QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级->{0}", _QuestStart);
+
+                if (_QuestStart > cMax_QuestStar)
+                {
+                    Log.HexWar(_QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级超出限制 ->{0},修正为2Dos星最大值{1}", _QuestStart, cMax_QuestStar);
+                    HexHelper.ModifyIntHexToBytes(target, cMax_QuestStar, _QuestInfoPtr + cQuestInfo_Star_Offset, cQuestInfo_Star_Lenght);
+                }
+                else
+                {
+                    Log.HexColor(ConsoleColor.Magenta, _QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级->{0}", _QuestStart);
+                }
 
                 int _QuestTargetMapID = HexHelper.bytesToInt(target, cQuestInfo_TargetMapID_Lenght, _QuestInfoPtr + cQuestInfo_TargetMap_Offset);
                 if (_QuestTargetMapID > cMax_MapID)
@@ -380,6 +396,11 @@ namespace MHFQuestToMH2Dos
 
                 uint _QuestID = HexHelper.bytesToUInt(target, cQuestInfo_QuestID_Lenght, _QuestInfoPtr + cQuestInfo_QuestID_Offset);
                 Log.HexTips(_QuestInfoPtr + cQuestInfo_QuestID_Offset, "任务编号【{0}】", _QuestID);
+                if (_QuestID < 60000)
+                {
+                    HexHelper.ModifyIntHexToBytes(target, cModify_QuestID, _QuestInfoPtr + cQuestInfo_QuestID_Offset, cQuestInfo_QuestID_Lenght);
+                    Log.HexTips(_QuestInfoPtr + cQuestInfo_QuestID_Offset, "任务编号【{0}】小于60000，修正为【{1}】,使其可下载", _QuestID, cModify_QuestID);
+                }
 
                 //从前4字节取出指针 定位任务信息位置
                 int _QuestContentPtr = HexHelper.bytesToInt(target, 4, _QuestInfoPtr + 36);
@@ -395,8 +416,8 @@ namespace MHFQuestToMH2Dos
 
                 if (_GuTiValue > cMax_GuTi)
                 {
-
-                    Log.HexColor(ConsoleColor.Blue, 0x48, "固体值 ->{0}", _GuTiValue);
+                    Log.HexWar(0x48, "固体值超出限制 ->{0},修正为2Dos最大值{1}", _GuTiValue, cMax_GuTi);
+                    HexHelper.ModifyIntHexToBytes(target, cMax_GuTi, 0x48, 4);
                 }
                 else
                 {
@@ -497,9 +518,11 @@ namespace MHFQuestToMH2Dos
                     int ItemID = HexHelper.bytesToInt(target, 2, CurrPtr + 0x02);//道具ID
                     int count = HexHelper.bytesToInt(target, 2, CurrPtr + 0x04);//数量
 
+                    //判断道具ID是否超限
                     if (ItemID > cMax_ItemID)
                     {
-                        Log.HexWar(CurrPtr, "第{0}个报酬道具，ID->{1}道具ID超出最大可能{2}，属于MHF道具【" + MHHelper.Get2MHFItemName(ItemID) + "】", setCount, ItemID, cMax_ItemID);
+                        Log.HexWar(CurrPtr, "第{0}个报酬道具，ID->{1}道具ID超出最大可能{2}，属于MHF道具【" + MHHelper.Get2MHFItemName(ItemID) + "】,将其修正为【不可燃烧的废物】ID->{3}", setCount, ItemID, cMax_ItemID, cModify_OutOfItemID);
+                        HexHelper.ModifyIntHexToBytes(target, cModify_OutOfItemID, CurrPtr + 0x02, 2);
                     }
                     else
                     {
@@ -507,7 +530,6 @@ namespace MHFQuestToMH2Dos
                         Log.HexColor(ConsoleColor.Green,CurrPtr,"第{0}个报酬道具，道具ID->{1} 【"+ MHHelper.Get2DosItemName(ItemID) + "】 概率->{2} 数量->{3}", setCount, ItemID, Pr, count);
                     }
 
-                    //TODO 判断道具ID是否超限
                     CurrPtr += 0x06;//前推游标
                 }
             }
@@ -552,11 +574,9 @@ namespace MHFQuestToMH2Dos
                         //报酬组类型
                         int _BOSSID = HexHelper.bytesToInt(target, 0x04, CurrPtr);
 
-
-
                         if (_BOSSID > cMax_MonsterID)
                         {
-                            Log.HexWar(CurrPtr, "第{0}个BOSS，ID->{1} 大于了 最大ID{2} 属于MHF怪物", BOSSIndex, _BOSSID, cMax_MonsterID);
+                            Log.HexWar(CurrPtr, "第{0}个BOSS，ID->{1} 大于了 最大ID{2} 属于MHF怪物,该任务无法使用", BOSSIndex, _BOSSID, cMax_MonsterID);
                         }
                         else
                         {
