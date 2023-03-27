@@ -42,12 +42,6 @@ namespace MHFQuestToMH2Dos
         /// </summary>
         const int cSetInfoPtrGourpMoveToStarPos = 0x88;
 
-
-
-        /// <summary>
-        /// 任务内容 指针组 总长度
-        /// </summary>
-        const int cQuestContenPtrGourpLenght = 72;
         /// <summary>
         /// 任务内容 指针组 到的指定位置
         /// </summary>
@@ -115,16 +109,14 @@ namespace MHFQuestToMH2Dos
             if (ModifyTextOffset(target, out byte[] out_ModifyTextOffset))
                 target = out_ModifyTextOffset;
 
-            //if (ModifyQuestMap(target, out byte[] out_ModifyQuestMap))
-            //    target = out_ModifyQuestMap;
+            if (ModifyQuestMap(target, out byte[] out_ModifyQuestMap))
+                target = out_ModifyQuestMap;
 
+            if (ModifyQuestBOSS(target, out byte[] out_ModifyQuestBOSS))
+                target = out_ModifyQuestBOSS;
 
-            //if (ModifyQuestBOSS(target, out byte[] out_ModifyQuestBOSS))
-            //    target = out_ModifyQuestBOSS;
-
-            //if (ModifyQuestRewardItem(target, out byte[] out_ModifyQuestRewardItem))
-            //    target = out_ModifyQuestRewardItem;
-
+            if (ModifyQuestRewardItem(target, out byte[] out_ModifyQuestRewardItem))
+                target = out_ModifyQuestRewardItem;
 
             return true;
         }
