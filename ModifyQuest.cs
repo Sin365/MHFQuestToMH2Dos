@@ -372,17 +372,30 @@ namespace MHFQuestToMH2Dos
                 Log.HexInfo(_QuestInfoPtr + cQuestInfo_Type_Offset, "任务类型->{0}", _QuestType);
 
                 //任务星
-                int _QuestStart = HexHelper.bytesToInt(target, cQuestInfo_Star_Lenght, _QuestInfoPtr + cQuestInfo_Star_Offset);
+                //int _QuestStart = HexHelper.bytesToInt(target, cQuestInfo_Star_Lenght, _QuestInfoPtr + cQuestInfo_Star_Offset);
+                //if (_QuestStart > cMax_QuestStar)
+                //{
+                //    Log.HexWar(_QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级超出限制 ->{0},修正为2Dos星最大值{1}", _QuestStart, cMax_QuestStar);
+                //    HexHelper.ModifyIntHexToBytes(target, cMax_QuestStar, _QuestInfoPtr + cQuestInfo_Star_Offset, cQuestInfo_Star_Lenght);
+                //}
+                //else
+                //{
+                //    Log.HexColor(ConsoleColor.Magenta, _QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级->{0}", _QuestStart);
+                //}
 
+                //任务星 尝试处理方案
+                int _QuestStart = HexHelper.bytesToInt(target, 1, _QuestInfoPtr + cQuestInfo_Star_Offset);
                 if (_QuestStart > cMax_QuestStar)
                 {
                     Log.HexWar(_QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级超出限制 ->{0},修正为2Dos星最大值{1}", _QuestStart, cMax_QuestStar);
-                    HexHelper.ModifyIntHexToBytes(target, cMax_QuestStar, _QuestInfoPtr + cQuestInfo_Star_Offset, cQuestInfo_Star_Lenght);
                 }
                 else
                 {
                     Log.HexColor(ConsoleColor.Magenta, _QuestInfoPtr + cQuestInfo_Star_Offset, "任务星级->{0}", _QuestStart);
                 }
+                Log.HexTips(_QuestInfoPtr + cQuestInfo_Star_Offset, "写入任务星级,MHF为2位,2Dos为1位{0}，覆盖第二位无意义数据", _QuestStart);
+                HexHelper.ModifyIntHexToBytes(target, cMax_QuestStar, _QuestInfoPtr + cQuestInfo_Star_Offset, cQuestInfo_Star_Lenght);
+
 
                 int _QuestTargetMapID = HexHelper.bytesToInt(target, cQuestInfo_TargetMapID_Lenght, _QuestInfoPtr + cQuestInfo_TargetMap_Offset);
                 if (_QuestTargetMapID > cMax_MapID)
