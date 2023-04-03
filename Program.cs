@@ -8,7 +8,8 @@ namespace MHFQuestToMH2Dos
 
         const string InDir = "Input";
         const string OutDir = "Out";
-        const string Ver = "0.2.1";
+        const string PosFile2DosDir = "PosFile2Dos";
+        const string Ver = "0.3.0";
 
         static void Main(string[] args)
         {
@@ -30,8 +31,42 @@ namespace MHFQuestToMH2Dos
                 return;
             }
 
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); 
+            if (!Directory.Exists(loc + PosFile2DosDir))
+            {
+                Console.WriteLine("Templete文件不存在");
+                Console.ReadLine();
+                return;
+            }
 
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            string[] tempfiles = FileHelper.GetDirFile(loc + PosFile2DosDir);
+            int index_temp = 0;
+            int errcount_temp = 0;
+            for (int i = 0; i < tempfiles.Length; i++)
+            {
+                string FileName = tempfiles[i].Substring(tempfiles[i].LastIndexOf("\\"));
+
+                if (!FileName.ToLower().Contains(".mib") && !FileName.ToLower().Contains(".bin"))
+                {
+                    continue;
+                }
+                index_temp++;
+
+                Console.WriteLine($">>>>>>>>>>>>>>读取 第{index_temp}个模板文件  {FileName}<<<<<<<<<<<<<<<<<<<");
+                FileHelper.LoadFile(tempfiles[i], out byte[] data);
+                if (LoadToSaveTemplate.LoadMapTemplateAreaData(data, FileName, tempfiles[i]))
+                {
+                    Console.WriteLine($">>>>>>>>>>>>>>成功读取 第{index_temp}个,"+ FileName);
+                }
+                else
+                {
+                    errcount_temp++;
+                    Console.WriteLine($">>>>>>>>>>>>>>成功失败 第{index_temp}个");
+                }
+            }
+
+            Console.WriteLine($"原数据读取完毕");
 
             string[] files = FileHelper.GetDirFile(loc + InDir);
             Console.WriteLine($"共{files.Length}个文件，是否处理? (y/n)");

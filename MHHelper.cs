@@ -7,8 +7,19 @@ using System.Threading.Tasks;
 
 namespace MHFQuestToMH2Dos
 {
-    public class MHHelper
+    public static class MHHelper
     {
+
+        /// <summary>
+        /// 地图区域数量
+        /// </summary>
+        static List<int> MapAreaCount = new List<int> { 0, 7, 13, 12, 11, 10, 11, 2, 2, 2, 2, 10, 4, 9, 0, 11, 13, 12, 11, 10, 11, 10, 4, 7, 2, 2 };
+
+        public static int GetMapAreaCount(int MapId)
+        {
+            return MapAreaCount[MapId];
+        }
+
         public static bool CheckEnd(byte[] data, int Ptr)
         {
             return HexHelper.bytesToUInt(data, 2, Ptr) == 0xFFFF;

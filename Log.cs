@@ -47,5 +47,10 @@ namespace MHFQuestToMH2Dos
             HexInfo(HexPos, log, arr);
             Console.ForegroundColor = src_color;
         }
+
+        public static void Info(string log)
+        {
+            Console.WriteLine(log);
+        }
     }
 }

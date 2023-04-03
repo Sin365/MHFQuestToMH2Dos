@@ -9,102 +9,102 @@ namespace MHFQuestToMH2Dos
     public static class ModifyQuest
     {
 
-        const int cMax_MapID = 0x49;
-        const int cMax_MonsterID = 0x49;
-        const int cMax_ItemID = 0x031D;
+        public const int cMax_MapID = 0x49;
+        public const int cMax_MonsterID = 0x49;
+        public const int cMax_ItemID = 0x031D;
 
-        const int cMax_GuTi = 0xA;
-        const int cMax_QuestStar = 8;
+        public const int cMax_GuTi = 0xA;
+        public const int cMax_QuestStar = 8;
 
-        const int cModify_QuestID = 0xEA74;
+        public const int cModify_QuestID = 0xEA74;
 
         /// <summary>
         /// 道具ID超出最大限制时，修改为【不可燃烧的废物】
         /// </summary>
-        const int cModify_OutOfItemID = 0x00AE;
+        public const int cModify_OutOfItemID = 0x00AE;
 
         /// <summary>
         /// Dos中无意义数据
         /// </summary>
-        const int cNon0x00For2DosPtr = 19;
+        public const int cNon0x00For2DosPtr = 19;
         /// <summary>
         /// MHF任务信息偏移
         /// </summary>
-        const int cQuestMHFOffset = 12;
+        public const int cQuestMHFOffset = 12;
         /// <summary>
         /// 2Dos任务信息偏移
         /// </summary>
-        const int cQuest2DosOffset = 8;
+        public const int cQuest2DosOffset = 8;
         /// <summary>
         /// 任务信息需偏移长度
         /// </summary>
-        const int cQuestMhfToDosSetLenght = 64;
+        public const int cQuestMhfToDosSetLenght = 64;
 
         /// <summary>
         /// 任务信息 指针组 总长度
         /// </summary>
-        const int cQuest2DosInfoPtrGourpLenght = 72;
+        public const int cQuest2DosInfoPtrGourpLenght = 72;
         /// <summary>
         /// 移动信息指针组 到的指定位置
         /// </summary>
-        const int cSetInfoPtrGourpMoveToStarPos = 0x88;
+        public const int cSetInfoPtrGourpMoveToStarPos = 0x88;
 
         /// <summary>
         /// 任务内容 指针组 到的指定位置
         /// </summary>
-        const int cQuestContenPtrGourpMoveToStarPos = 0xD0;
+        public const int cQuestContenPtrGourpMoveToStarPos = 0xD0;
 
 
 
         /// <summary>
         /// 移动整个任务文本 到的指定位置
         /// </summary>
-        const int cQuestTextAllMsgMoveToStarPos = 0xF0;
+        public const int cQuestTextAllMsgMoveToStarPos = 0xF0;
         /// <summary>
         /// 移动整个任务文本 到的指定的截止位置
         /// </summary>
-        const int cQuestTextAllMsgMoveToEndPos = 0x1Ff;
+        public const int cQuestTextAllMsgMoveToEndPos = 0x1Ff;
 
 
 
         /// <summary>
         /// 任务_类型 偏移
         /// </summary>
-        const int cQuestInfo_Type_Offset = 0;
+        public const int cQuestInfo_Type_Offset = 0;
         /// <summary>
         /// 任务_类型 长度
         /// </summary>
-        const int cQuestInfo_Type_Lenght = 1;
+        public const int cQuestInfo_Type_Lenght = 1;
 
         /// <summary>
         /// 任务_星级 偏移
         /// </summary>
-        const int cQuestInfo_Star_Offset = 4;
+        public const int cQuestInfo_Star_Offset = 4;
         /// <summary>
         /// 任务_星级 长度
         /// </summary>
-        const int cQuestInfo_Star_Lenght = 2;
+        public const int cQuestInfo_Star_Lenght = 2;
 
 
         /// <summary>
         /// 任务_类型 偏移
         /// </summary>
-        const int cQuestInfo_TargetMap_Offset = 32;
+        public const int cQuestInfo_TargetMap_Offset = 32;
 
 
         /// <summary>
         /// 任务_类型 长度
         /// </summary>
-        const int cQuestInfo_TargetMapID_Lenght = 1;
+        public const int cQuestInfo_TargetMapID_Lenght = 1;
 
         /// <summary>
         /// 任务_类型 偏移
         /// </summary>
-        const int cQuestInfo_QuestID_Offset = 42;
+        public const int cQuestInfo_QuestID_Offset = 42;
         /// <summary>
         /// 任务_类型 长度
         /// </summary>
-        const int cQuestInfo_QuestID_Lenght = 2;
+        public const int cQuestInfo_QuestID_Lenght = 2;
 
         public static bool ModifyQuset(byte[] src, out byte[] target)
         {

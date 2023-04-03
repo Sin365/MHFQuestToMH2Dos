@@ -21,6 +21,23 @@ namespace MHFQuestToMH2Dos
             return target;
         }
 
+        /// <summary>
+        /// 读取byte[]数据
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="lenght"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public static byte[] ReadBytes(byte[] src, int lenght, int offset = 0)
+        {
+            byte[] data = new byte[lenght];
+            for (int i = 0; i < lenght; i++)
+            {
+                data[i] = src[offset + i];
+            }
+            return data;
+        }
+
         /**  
         * byte[]转换int byte高位在前
         */
@@ -103,6 +120,7 @@ namespace MHFQuestToMH2Dos
             string str = encoding.GetString(src.ToArray());
             return str;
         }
+
 
         /**  
         * 写入int到byte[] byte高位在前
