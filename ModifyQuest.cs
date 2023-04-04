@@ -125,6 +125,9 @@ namespace MHFQuestToMH2Dos
             if (ModifyQuestRewardItem(target, out byte[] out_ModifyQuestRewardItem))
                 target = out_ModifyQuestRewardItem;
 
+            if (FixMapAreaData(target, out byte[] out_FixMapAreaData))
+                target = out_FixMapAreaData;
+
             return true;
         }
 
@@ -605,6 +608,127 @@ namespace MHFQuestToMH2Dos
             {
                 Console.WriteLine(ex); target = null; return false;
             }
+        }
+
+
+
+        public static bool FixMapAreaData(byte[] src,out byte[] target)
+        {
+            int _QuestTargetMapID;
+            try
+            {
+                target = HexHelper.CopyByteArr(src);//加载数据
+
+                //从前4字节取出指针 定位任务信息位置
+                int _QuestInfoPtr = HexHelper.bytesToInt(target, 4, 0x00);
+                Log.HexTips(0x00, "开始读取任务头部信息,指针->{0}", _QuestInfoPtr);
+
+                //任务目的地MapID
+                _QuestTargetMapID = HexHelper.bytesToInt(target, ModifyQuest.cQuestInfo_TargetMapID_Lenght, _QuestInfoPtr + ModifyQuest.cQuestInfo_TargetMap_Offset);
+                Log.HexColor(ConsoleColor.Green, _QuestInfoPtr + ModifyQuest.cQuestInfo_TargetMap_Offset, "目的地地图,指针->{0} 【" + MHHelper.Get2MapName(_QuestTargetMapID) + "】", _QuestTargetMapID);
+
+                //区域数量
+                int _AreaCount = MHHelper.GetMapAreaCount(_QuestTargetMapID);
+                Log.Info(MHHelper.Get2MapName(_QuestTargetMapID) + "的地图数量" + _AreaCount);
+
+                MapAreaData srcData2Dos = LoadToSaveTemplate.DictMapAreaData[_QuestTargetMapID];
+
+                #region 换区设置
+
+                //换区设置指针
+                int _CAreaSetTopPtr = HexHelper.bytesToInt(target, 4, 0x1C);
+                Log.HexInfo(0x1C, "换区设置指针->{0}", _CAreaSetTopPtr);
+
+                //读取换区单个区域游标
+                int _CAreaSetTop_CurrPtr = _CAreaSetTopPtr;
+
+                for (int i = 0; i < _AreaCount; i++)
+                {
+                    int _One_CurrPtr = HexHelper.bytesToInt(target, 4, _CAreaSetTop_CurrPtr);
+
+                    if (_One_CurrPtr == 0x0)
+                    {
+                        Log.HexInfo(_CAreaSetTop_CurrPtr, "区域设置" + i + "指针为0，跳过");
+                        break;
+                    }
+
+                    if (srcData2Dos.targetDatas.Length <= i)
+                    {
+                        Log.HexWar(_One_CurrPtr, "第" + i + "区 区域设置,比2Dos区数超限。");
+                        break;
+                    }
+
+
+                    int Set_TargetIndex = 0;
+                    while (true)
+                    {
+                        if (MHHelper.CheckEnd(target, _One_CurrPtr)
+                        ||
+                        HexHelper.bytesToInt(target, 1, _One_CurrPtr) == 0)
+                        {
+                            Log.HexInfo(_One_CurrPtr, "区域设置结束符");
+                            break;
+                        }
+
+                        if (srcData2Dos.targetDatas.Length <= i)
+                        {
+                            Log.HexWar(_One_CurrPtr, "第" + i + "区,第" + Set_TargetIndex + "个目标,比2Dos目标数超限。");
+                            break;
+                        }
+
+                        byte[] srcOneData = srcData2Dos.targetDatas[i].targetData[Set_TargetIndex];
+
+                        if (!HexHelper.CheckDataEquals(target, srcOneData, _One_CurrPtr))
+                        {
+                            Log.HexWar(_One_CurrPtr, "第" + i + "区，第" + Set_TargetIndex + "个目标，数据和2Dos差异，长度{0}", srcOneData.Length);
+                        }
+
+                        HexHelper.ModifyDataToBytes(target, srcOneData, _One_CurrPtr);
+                        Log.HexTips(_One_CurrPtr, "第" + i + "区，第" + Set_TargetIndex + "个目标，更换为2Dos数据，长度{0}", srcOneData.Length);
+
+                        Set_TargetIndex++;
+                        _One_CurrPtr += 0x34;
+                    }
+
+                    _CAreaSetTop_CurrPtr += 0x4;
+                }
+                #endregion
+
+                #region 区域映射
+                //区域映射指针
+                int _CAreaPosTopPtr = HexHelper.bytesToInt(target, 4, 0x20);
+                Log.HexInfo(0x20, "换区映射指针->{0}", _CAreaPosTopPtr);
+                //读取单个区域映射游标
+                int _CAreaPosTop_CurrPtr = _CAreaPosTopPtr;
+                for (int i = 0; i < _AreaCount; i++)
+                {
+                    if (srcData2Dos.targetDatas.Length <= i)
+                    {
+                        Log.HexWar(_CAreaPosTop_CurrPtr, "第" + i + "区 换区映射,比2Dos区数超限。");
+                        break;
+                    }
+                    byte[] srcOneData = srcData2Dos.areaPosDatas[i];
+
+                    if (!HexHelper.CheckDataEquals(target, srcOneData, _CAreaPosTop_CurrPtr))
+                    {
+                        Log.HexWar(_CAreaPosTop_CurrPtr, "第" + i + "区的区域映射，数据和2Dos差异，读取数据,长度{0}", srcOneData.Length);
+                    }
+
+                    HexHelper.ModifyDataToBytes(target, srcOneData, _CAreaPosTop_CurrPtr);
+                    Log.HexTips(_CAreaPosTop_CurrPtr, "第" + i + "区的区域映射，更换为2Dos数据，读取数据,长度{0}", srcOneData.Length);
+                    _CAreaPosTop_CurrPtr += 0x20;
+                }
+                #endregion
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                target = null;
+                return false;
+            }
+
+            return true;
         }
     }
 }

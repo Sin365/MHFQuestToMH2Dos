@@ -66,11 +66,10 @@ namespace MHFQuestToMH2Dos
                 }
             }
 
-            Console.WriteLine($"原数据读取完毕");
+            Console.WriteLine($"-----------原数据读取完毕-----------");
 
             string[] files = FileHelper.GetDirFile(loc + InDir);
             Console.WriteLine($"共{files.Length}个文件，是否处理? (y/n)");
-
 
             string yn = Console.ReadLine();
             if (yn.ToLower() != "y")

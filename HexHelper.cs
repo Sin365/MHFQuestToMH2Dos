@@ -137,6 +137,42 @@ namespace MHFQuestToMH2Dos
                 srcdata[startoffset + i] = targetVal[i];
         }
 
+
+        /**  
+        * 写入byte[]到byte[] byte高位在前
+        */
+        public static void ModifyDataToBytes(byte[] srcdata, byte[] targetVal, int startoffset)
+        {
+            //抹去数据
+            for (int i = 0; i < targetVal.Length; i++)
+                srcdata[startoffset + i] = 0x00;
+
+            for (int i = 0; i < targetVal.Length && i < targetVal.Length; i++)
+                srcdata[startoffset + i] = targetVal[i];
+        }
+
+
+
+        /**  
+        * 对比数据
+        */
+        public static bool CheckDataEquals(byte[] srcdata, byte[] targetVal, int startoffset)
+        {
+            byte[] temp = new byte[targetVal.Length];
+            for (int i = 0; i < targetVal.Length && i < targetVal.Length; i++)
+                temp[i] = srcdata[startoffset + i];
+
+            if (!Array.Equals(targetVal, temp))
+            {
+                for (int i = 0; i < targetVal.Length; i++)
+                {
+                    Console.WriteLine($"{(targetVal[i] != temp[i] ? "不等" : "相等")} target：{targetVal[i]} src：{temp[i]}");
+                }
+            }
+
+            return Array.Equals(targetVal, temp);
+        }
+
         /// <summary>
         /// 另一种16进制转10进制的处理方式，Multiplier参与*16的循环很巧妙，对Multiplier的处理很推荐，逻辑统一
         /// </summary>

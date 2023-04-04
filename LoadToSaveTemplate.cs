@@ -70,6 +70,12 @@ namespace MHFQuestToMH2Dos
                 {
                     int _One_CurrPtr = HexHelper.bytesToInt(target, 4, _CAreaSetTop_CurrPtr);
 
+                    if (_One_CurrPtr == 0x0)
+                    {
+                        Log.HexInfo(_CAreaSetTop_CurrPtr, "区域设置"+i+"指针为0，跳过");
+                        break;
+                    }
+
                     List<byte[]> datas = new List<byte[]>();
                     int Set_TargetIndex = 0;
                     while (true)
