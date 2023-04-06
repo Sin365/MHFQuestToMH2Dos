@@ -54,33 +54,93 @@ namespace MHFQuestToMH2Dos
             return "未定义";
         }
 
+
+        public static bool CheckIsXunLianMode(int mode)
+        {
+            return XunLianMode.Contains(mode);
+        }
+
+        public static bool CheckIsDayMode(int mode)
+        {
+            return DayMode.Contains(mode);
+        }
+
+        public static bool CheckIsNightMode(int mode)
+        {
+            return NightMode.Contains(mode);
+        }
+
+        static List<int> NightMode = new List<int>() { 0x11,0x12,0x14};
+
+        static List<int> XunLianMode = new List<int>() { 0x3F, 0xBF};
+
+        static List<int> DayMode = new List<int>() { 0x19,0x1A,0x1C,0x9,0xA,0xC};
+
+        public static bool CheckIsDayMapID(int mapid)
+        {
+            return Dict2DosMap_Day.ContainsKey(mapid);
+        }
+
+        public static bool CheckIsNightMapID(int mapid)
+        {
+            return Dict2DosMap_Night.ContainsKey(mapid);
+        }
+
+        static Dictionary<int, string> Dict2DosMap_Day = new Dictionary<int, string>()
+        {
+        {0x1,"砦(昼)"},
+{0x2,"森丘(昼)"},
+{0x3,"砂漠(昼)"},
+{0x4,"沼地(昼)"},
+{0x5,"火山(昼)"},
+{0x6,"密林(昼)"},
+{0x9,"大闘技場(昼)"},
+{0xA,"闘技場(昼)"},
+{0xB,"雪山(昼)"},
+{0xC,"戦闘街(昼)"},
+};
+
+        static Dictionary<int, string> Dict2DosMap_Night = new Dictionary<int, string>()
+        {
+{0x10,"森丘(夜)"},
+{0x11,"砂漠(夜)"},
+{0x12,"沼地(夜)"},
+{0x13,"火山(夜)"},
+{0x14,"密林(夜)"},
+{0x15,"雪山(夜)"},
+{0x16,"戦闘街(夜)"},
+{0x17,"砦(夜)"},
+{0x18,"大闘技場(夜)"},
+{0x19,"闘技場(夜)"},
+};
+
         static Dictionary<int, string> Dict2DosMap = new Dictionary<int, string>()
         {
-        {0x1,"砦"},
-{0x2,"森丘"},
-{0x3,"砂漠"},
-{0x4,"沼地"},
-{0x5,"火山"},
-{0x6,"密林"},
-{0x7,"城"},
-{0x8,"決戦場紅"},
-{0x9,"大闘技場"},
-{0xA,"闘技場"},
-{0xB,"雪山"},
-{0xC,"戦闘街"},
+        {0x1,"砦(昼)"},
+{0x2,"森丘(昼)"},
+{0x3,"砂漠(昼)"},
+{0x4,"沼地(昼)"},
+{0x5,"火山(昼)"},
+{0x6,"密林(昼)"},
+{0x7,"修雷特城"},
+{0x8,"决战场"},
+{0x9,"大闘技場(昼)"},
+{0xA,"闘技場(昼)"},
+{0xB,"雪山(昼)"},
+{0xC,"戦闘街(昼)"},
 {0xD,"塔A"},
 {0xE,"塔B"},
 {0xF,"塔C"},
-{0x10,"森丘"},
-{0x11,"砂漠"},
-{0x12,"沼地"},
-{0x13,"火山"},
-{0x14,"密林"},
-{0x15,"雪山"},
-{0x16,"戦闘街"},
-{0x17,"砦"},
-{0x18,"大闘技場"},
-{0x19,"闘技場"},
+{0x10,"森丘(夜)"},
+{0x11,"砂漠(夜)"},
+{0x12,"沼地(夜)"},
+{0x13,"火山(夜)"},
+{0x14,"密林(夜)"},
+{0x15,"雪山(夜)"},
+{0x16,"戦闘街(夜)"},
+{0x17,"砦(夜)"},
+{0x18,"大闘技場(夜)"},
+{0x19,"闘技場(夜)"},
 };
         static Dictionary<int, string> Dict2DosBoss = new Dictionary<int, string>()
 {

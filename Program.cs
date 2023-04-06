@@ -17,6 +17,7 @@ namespace MHFQuestToMH2Dos
             Console.Title = title;
             Console.WriteLine(title);
 
+
             if (!Directory.Exists(loc + InDir))
             {
                 Console.WriteLine("Input文件不存在");
@@ -53,16 +54,16 @@ namespace MHFQuestToMH2Dos
                 }
                 index_temp++;
 
-                Console.WriteLine($">>>>>>>>>>>>>>读取 第{index_temp}个模板文件  {FileName}<<<<<<<<<<<<<<<<<<<");
+                //Console.WriteLine($">>>>>>>>>>>>>>读取 第{index_temp}个模板文件  {FileName}<<<<<<<<<<<<<<<<<<<");
                 FileHelper.LoadFile(tempfiles[i], out byte[] data);
                 if (LoadToSaveTemplate.LoadMapTemplateAreaData(data, FileName, tempfiles[i]))
                 {
-                    Console.WriteLine($">>>>>>>>>>>>>>成功读取 第{index_temp}个,"+ FileName);
+                    //Console.WriteLine($">>>>>>>>>>>>>>成功读取 第{index_temp}个,"+ FileName);
                 }
                 else
                 {
                     errcount_temp++;
-                    Console.WriteLine($">>>>>>>>>>>>>>成功失败 第{index_temp}个");
+                    //Console.WriteLine($">>>>>>>>>>>>>>成功失败 第{index_temp}个");
                 }
             }
 
@@ -93,6 +94,9 @@ namespace MHFQuestToMH2Dos
                 {
                     string newfileName = FileName + "_fix";
                     string outstring = loc + OutDir + "\\" + newfileName;
+
+                    //LoadToSaveTemplate.GetModeType(targetdata, FileName);
+
                     FileHelper.SaveFile(outstring, targetdata);
                     Console.WriteLine($">>>>>>>>>>>>>>成功处理 第{index}个:{outstring}");
                 }
@@ -104,6 +108,15 @@ namespace MHFQuestToMH2Dos
             }
 
             Console.WriteLine($"已处理{files.Length}个文件，其中{errcount}个失败");
+
+
+            string[] tempkeys = LoadToSaveTemplate.DictTimeTypeCount.Keys.OrderBy(w => w).ToArray();
+
+            foreach (var r in tempkeys)
+            {
+                Console.WriteLine(r + ":" + LoadToSaveTemplate.DictTimeTypeCount[r]);
+            }
+
             Console.ReadLine();
         }
     }

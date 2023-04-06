@@ -162,14 +162,6 @@ namespace MHFQuestToMH2Dos
             for (int i = 0; i < targetVal.Length && i < targetVal.Length; i++)
                 temp[i] = srcdata[startoffset + i];
 
-            if (!Array.Equals(targetVal, temp))
-            {
-                for (int i = 0; i < targetVal.Length; i++)
-                {
-                    Console.WriteLine($"{(targetVal[i] != temp[i] ? "不等" : "相等")} target：{targetVal[i]} src：{temp[i]}");
-                }
-            }
-
             return Array.Equals(targetVal, temp);
         }
 

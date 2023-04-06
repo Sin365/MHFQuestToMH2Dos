@@ -181,7 +181,6 @@ namespace MHFQuestToMH2Dos
             }
         }
 
-
         /// <summary>
         /// 迁移任务信息
         /// </summary>
@@ -374,6 +373,8 @@ namespace MHFQuestToMH2Dos
                 int _QuestType = HexHelper.bytesToInt(target, cQuestInfo_Type_Lenght, _QuestInfoPtr + cQuestInfo_Type_Offset);
                 Log.HexInfo(_QuestInfoPtr + cQuestInfo_Type_Offset, "任务类型->{0}", _QuestType);
 
+
+
                 //任务星
                 //int _QuestStart = HexHelper.bytesToInt(target, cQuestInfo_Star_Lenght, _QuestInfoPtr + cQuestInfo_Star_Offset);
                 //if (_QuestStart > cMax_QuestStar)
@@ -409,6 +410,36 @@ namespace MHFQuestToMH2Dos
                 {
                     Log.HexColor(ConsoleColor.Green, _QuestInfoPtr + cQuestInfo_TargetMap_Offset, "目的地地图,指针->{0} 【"+MHHelper.Get2MapName(_QuestTargetMapID)+ "】", _QuestTargetMapID);
                 }
+
+                int _ModeType = HexHelper.bytesToInt(target, 1, _QuestInfoPtr + 2);
+                //非训练任务
+                if (!MHHelper.CheckIsXunLianMode(_ModeType))
+                {
+                    Log.HexTips(_QuestInfoPtr + 2, "任务模式->原始数据{0}", _ModeType);
+                    //如果是昼地图 但不是昼模式
+                    if (MHHelper.CheckIsDayMapID(_QuestTargetMapID)
+                        &&
+                        !MHHelper.CheckIsDayMode(_ModeType)
+                        )
+                    {
+                        HexHelper.ModifyIntHexToBytes(target, 0x1C, _QuestInfoPtr + 2, 1);
+                        Log.HexWar(_QuestInfoPtr + 2, "任务模式->修改白天 为{0}", 0x1C);
+                    }
+                    //如果是夜地图 但不是夜模式
+                    else if (MHHelper.CheckIsNightMapID(_QuestTargetMapID)
+                        &&
+                        !MHHelper.CheckIsNightMode(_ModeType)
+                        )
+                    {
+                        HexHelper.ModifyIntHexToBytes(target, 0x12, _QuestInfoPtr + 2, 1);
+                        Log.HexWar(_QuestInfoPtr + 2, "任务模式->修改黑夜 为{0}", 0x12);
+                    }
+                }
+                else
+                {
+                    Log.HexTips(_QuestInfoPtr + 2, "任务模式 原始数据 是训练模式 ->{0}", _ModeType);
+                }
+
 
                 uint _QuestID = HexHelper.bytesToUInt(target, cQuestInfo_QuestID_Lenght, _QuestInfoPtr + cQuestInfo_QuestID_Offset);
                 Log.HexTips(_QuestInfoPtr + cQuestInfo_QuestID_Offset, "任务编号【{0}】", _QuestID);
@@ -610,8 +641,6 @@ namespace MHFQuestToMH2Dos
             }
         }
 
-
-
         public static bool FixMapAreaData(byte[] src,out byte[] target)
         {
             int _QuestTargetMapID;
@@ -670,18 +699,13 @@ namespace MHFQuestToMH2Dos
                             break;
                         }
 
-                        if (srcData2Dos.targetDatas.Length <= i)
+                        if (srcData2Dos.targetDatas[i].targetData.Count <= Set_TargetIndex)
                         {
                             Log.HexWar(_One_CurrPtr, "第" + i + "区,第" + Set_TargetIndex + "个目标,比2Dos目标数超限。");
                             break;
                         }
 
                         byte[] srcOneData = srcData2Dos.targetDatas[i].targetData[Set_TargetIndex];
-
-                        if (!HexHelper.CheckDataEquals(target, srcOneData, _One_CurrPtr))
-                        {
-                            Log.HexWar(_One_CurrPtr, "第" + i + "区，第" + Set_TargetIndex + "个目标，数据和2Dos差异，长度{0}", srcOneData.Length);
-                        }
 
                         HexHelper.ModifyDataToBytes(target, srcOneData, _One_CurrPtr);
                         Log.HexTips(_One_CurrPtr, "第" + i + "区，第" + Set_TargetIndex + "个目标，更换为2Dos数据，长度{0}", srcOneData.Length);
@@ -708,11 +732,6 @@ namespace MHFQuestToMH2Dos
                         break;
                     }
                     byte[] srcOneData = srcData2Dos.areaPosDatas[i];
-
-                    if (!HexHelper.CheckDataEquals(target, srcOneData, _CAreaPosTop_CurrPtr))
-                    {
-                        Log.HexWar(_CAreaPosTop_CurrPtr, "第" + i + "区的区域映射，数据和2Dos差异，读取数据,长度{0}", srcOneData.Length);
-                    }
 
                     HexHelper.ModifyDataToBytes(target, srcOneData, _CAreaPosTop_CurrPtr);
                     Log.HexTips(_CAreaPosTop_CurrPtr, "第" + i + "区的区域映射，更换为2Dos数据，读取数据,长度{0}", srcOneData.Length);
