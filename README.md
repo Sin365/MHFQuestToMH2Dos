@@ -12,6 +12,15 @@
 
 本工具的初衷是，还原2Dos的一些官方活动任务
 
+
+YouTuBe：
+
+[![](https://res.cloudinary.com/marcomontalbano/image/upload/v1680856711/video_to_markdown/images/youtube--rTiA-OwAVTs-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=rTiA-OwAVTs "")
+
+Bilibili:
+
+[![](http://i1.hdslb.com/bfs/archive/2e49f2ff60765db2d2948bff37c9bc2926e6600a.jpg)](https://www.bilibili.com/video/BV1dc411L7eZ/)
+
 ### 使用前提 ###
 
 PS：本工具先需要将ReFrontier将MHF任务解密；
