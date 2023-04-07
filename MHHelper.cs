@@ -22,7 +22,7 @@ namespace MHFQuestToMH2Dos
 
         public static bool CheckEnd(byte[] data, int Ptr)
         {
-            return HexHelper.bytesToUInt(data, 2, Ptr) == 0xFFFF;
+            return HexHelper.bytesToUInt(data, 2, Ptr) == 0xFFFF || HexHelper.bytesToUInt(data, 1, Ptr) == 0xFF;
         }
 
 
@@ -54,6 +54,12 @@ namespace MHFQuestToMH2Dos
             return "未定义";
         }
 
+        public static string Get2DosFishName(int ID)
+        {
+            if (Dict2DosFish.ContainsKey(ID))
+                return Dict2DosFish[ID];
+            return "未定义";
+        }
 
         public static bool CheckIsXunLianMode(int mode)
         {
@@ -86,6 +92,33 @@ namespace MHFQuestToMH2Dos
             return Dict2DosMap_Night.ContainsKey(mapid);
         }
 
+
+        static Dictionary<int, string> Dict2DosFish = new Dictionary<int, string>()
+        {
+{0x0001,"曁魚"},
+{0x0002,"刺身魚"},
+{0x0003,"金槍魚"},
+{0x0004,"沙丁魚"},
+{0x0005,"黄金魚"},
+{0x0006,"眠魚"},
+{0x0007,"銀竜魚"},
+{0x0008,"金竜魚"},
+{0x0009,"拡散金魚"},
+{0x000A,"旗魚"},
+{0x000B,"貪吃金槍魚"},
+{0x000C,"古代魚"},
+{0x000D,"音符魚"},
+{0x000E,"蛇型鮭魚"},
+{0x000F,"女王蝦"},
+{0x0010,"大曁魚"},
+{0x0011,"小金魚"},
+{0x0012,"白金魚"},
+{0x0013,"大眠魚"},
+{0x0014,"大金槍魚"},
+{0x0015,"大沙丁魚"},
+{0x0016,"大竜魚"},
+{0x0017,"大貪吃金槍魚"},
+};
         static Dictionary<int, string> Dict2DosMap_Day = new Dictionary<int, string>()
         {
         {0x1,"砦(昼)"},

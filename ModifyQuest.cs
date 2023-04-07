@@ -12,6 +12,7 @@ namespace MHFQuestToMH2Dos
         public const int cMax_MapID = 0x49;
         public const int cMax_MonsterID = 0x49;
         public const int cMax_ItemID = 0x031D;
+        public const int cMax_FishID = 0x0017;
 
         public const int cMax_GuTi = 0xA;
         public const int cMax_QuestStar = 8;
@@ -22,6 +23,11 @@ namespace MHFQuestToMH2Dos
         /// 道具ID超出最大限制时，修改为【不可燃烧的废物】
         /// </summary>
         public const int cModify_OutOfItemID = 0x00AE;
+
+        /// <summary>
+        /// 鱼ID超出最大限制时，修改为【刺身鱼】
+        /// </summary>
+        public const int cModify_OutOfFishID = 0x0002;
 
         /// <summary>
         /// Dos中无意义数据
@@ -122,11 +128,20 @@ namespace MHFQuestToMH2Dos
             if (ModifyQuestBOSS(target, out byte[] out_ModifyQuestBOSS))
                 target = out_ModifyQuestBOSS;
 
+            if (FixMapAreaData(target, out byte[] out_FixMapAreaData))
+                target = out_FixMapAreaData;
+
             if (ModifyQuestRewardItem(target, out byte[] out_ModifyQuestRewardItem))
                 target = out_ModifyQuestRewardItem;
 
-            if (FixMapAreaData(target, out byte[] out_FixMapAreaData))
-                target = out_FixMapAreaData;
+            if (FixSuppliesItem(target, out byte[] out_FixSuppliesItem))
+                target = out_FixSuppliesItem;
+
+            if (FixItemPoint(target, out byte[] out_FixItemPoint))
+                target = out_FixItemPoint;
+
+            if (FixFishGroupPoint(target, out byte[] out_FixFishGroupPoint))
+                target = out_FixFishGroupPoint;
 
             return true;
         }
@@ -305,7 +320,7 @@ namespace MHFQuestToMH2Dos
                 for (int i = 0; i < QuestContenAllLenght; i++)
                     target[_QuestNametPtr + i] = 0xFF;//TODO 查看可视化效果
 
-                int MoveMaxLenght = cQuestTextAllMsgMoveToEndPos - cQuestTextAllMsgMoveToStarPos - 1;
+                int MoveMaxLenght = cQuestTextAllMsgMoveToEndPos - cQuestTextAllMsgMoveToStarPos;
 
                 Log.HexInfo(cQuestTextAllMsgMoveToStarPos, "写入数据【任务文本】到新位置");
                 //写入数据
@@ -482,59 +497,6 @@ namespace MHFQuestToMH2Dos
             }
         }
 
-        /// <summary>
-        /// 报酬
-        /// </summary>
-        /// <param name="src"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
-        public static bool ModifyQuestRewardItem(byte[] src, out byte[] target)
-        {
-            try
-            {
-                target = HexHelper.CopyByteArr(src);//加载数据
-                //任务报酬信息指针
-                int _QuestRewardPtr = HexHelper.bytesToInt(target, 4, 0x0C);
-
-                Log.HexTips(0x0C,"开始读取报酬组头部信息,指针->{0}", _QuestRewardPtr); ;
-
-                //读取组报酬游标
-                int CurrPtr = _QuestRewardPtr;
-                bool isFinish = false;
-
-                int GroupIndex = 0;
-                //循环取道具组
-                while (!isFinish)
-                {
-                    //若遇到结束符
-                    if (MHHelper.CheckEnd(target, CurrPtr))
-                    {
-                        isFinish = true;
-                        Log.HexInfo(CurrPtr,"遇报酬组头部信息结束符");
-                    }
-                    else
-                    {
-                        GroupIndex++;
-                        //报酬组类型
-                        int _RewardCondition = HexHelper.bytesToInt(target, 0x04, CurrPtr);
-                        //报酬组指针
-                        int _RewardGroupPtr = HexHelper.bytesToInt(target, 0x04, CurrPtr + 0x04);
-
-                        Log.HexTips(CurrPtr,"第{0}报酬组，报酬类型->{1} 报酬组指针->{2}", GroupIndex, _RewardCondition, _RewardGroupPtr);
-
-                        //取组内报酬
-                        if (QuestRewardGroup(target, out byte[] target_RewardGroup, _RewardGroupPtr))
-                            target = target_RewardGroup;
-                        CurrPtr += 0x08;//前推游标 读取下一个报酬道具组
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);target = null;return false;
-            }
-        }
         /// <summary>
         /// 轮询单个报酬组的数据
         /// </summary>
@@ -738,6 +700,342 @@ namespace MHFQuestToMH2Dos
                     _CAreaPosTop_CurrPtr += 0x20;
                 }
                 #endregion
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                target = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 报酬
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static bool ModifyQuestRewardItem(byte[] src, out byte[] target)
+        {
+            try
+            {
+                target = HexHelper.CopyByteArr(src);//加载数据
+                //任务报酬信息指针
+                int _QuestRewardPtr = HexHelper.bytesToInt(target, 4, 0x0C);
+
+                Log.HexTips(0x0C, "开始读取报酬组头部信息,指针->{0}", _QuestRewardPtr); ;
+
+                //读取组报酬游标
+                int CurrPtr = _QuestRewardPtr;
+                bool isFinish = false;
+
+                int GroupIndex = 0;
+                //循环取道具组
+                while (!isFinish)
+                {
+                    //若遇到结束符
+                    if (MHHelper.CheckEnd(target, CurrPtr))
+                    {
+                        isFinish = true;
+                        Log.HexInfo(CurrPtr, "遇报酬组头部信息结束符");
+                    }
+                    else
+                    {
+                        GroupIndex++;
+                        //报酬组类型
+                        int _RewardCondition = HexHelper.bytesToInt(target, 0x04, CurrPtr);
+                        //报酬组指针
+                        int _RewardGroupPtr = HexHelper.bytesToInt(target, 0x04, CurrPtr + 0x04);
+
+                        Log.HexTips(CurrPtr, "第{0}报酬组，报酬类型->{1} 报酬组指针->{2}", GroupIndex, _RewardCondition, _RewardGroupPtr);
+
+                        //取组内报酬
+                        if (QuestRewardGroup(target, out byte[] target_RewardGroup, _RewardGroupPtr))
+                            target = target_RewardGroup;
+                        CurrPtr += 0x08;//前推游标 读取下一个报酬道具组
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex); target = null; return false;
+            }
+        }
+
+        public static bool FixSuppliesItem(byte[] src, out byte[] target)
+        {
+            try
+            {
+                target = HexHelper.CopyByteArr(src);//加载数据
+                //支援道具指针
+                int _SuppliesItemPtr = HexHelper.bytesToInt(target, 4, 0x08);
+                Log.HexTips(0x08, "开始读取支援道具指针,指针->{0}", _SuppliesItemPtr);
+
+                int _SuppliesItem_CurrPtr = _SuppliesItemPtr;
+
+                for (int i = 0; i < 96; i++)
+                {
+                    //若遇到结束符或无数据
+                    if (MHHelper.CheckEnd(target, _SuppliesItem_CurrPtr)
+                        ||
+                        HexHelper.bytesToInt(target, 1, _SuppliesItem_CurrPtr) == 0
+                        )
+                    {
+                        Log.HexInfo(_SuppliesItem_CurrPtr, "主线支援道具，结束符");
+                        break;
+                    }
+
+                    int ItemID = HexHelper.bytesToInt(target, 2, _SuppliesItem_CurrPtr);//道具ID
+                    int Count = HexHelper.bytesToInt(target, 2, _SuppliesItem_CurrPtr + 0x02);//数量
+
+                    //判断道具ID是否超限
+                    if (ItemID > cMax_ItemID)
+                    {
+                        Log.HexWar(_SuppliesItem_CurrPtr, "主线支援道具,第" + i + "个ID->{0}道具ID超出最大可能{1}，属于MHF道具【" + MHHelper.Get2MHFItemName(ItemID) + "】,将其修正为【不可燃烧的废物】ID->{2}", ItemID, cMax_ItemID, cModify_OutOfItemID);
+                        HexHelper.ModifyIntHexToBytes(target, cModify_OutOfItemID, _SuppliesItem_CurrPtr, 2);
+                    }
+                    else
+                    {
+                        Log.HexColor(ConsoleColor.Green, _SuppliesItem_CurrPtr, "主线支援道具第" + i + "个，道具ID->{0} 【" + MHHelper.Get2DosItemName(ItemID) + "】 数量->{1}", ItemID, Count);
+                    }
+
+                    _SuppliesItem_CurrPtr += 0x04;
+                }
+
+                int _SuppliesItem_Zhi_1_CurrPtr = _SuppliesItemPtr + 0x60;
+                for (int i = 0; i < 32; i++)
+                {
+                    //若遇到结束符或无数据
+                    if (MHHelper.CheckEnd(target, _SuppliesItem_Zhi_1_CurrPtr)
+                        ||
+                        HexHelper.bytesToInt(target, 1, _SuppliesItem_Zhi_1_CurrPtr) == 0
+                        )
+                    {
+                        Log.HexInfo(_SuppliesItem_Zhi_1_CurrPtr, "支线1支援道具，结束符");
+                        break;
+                    }
+
+                    int ItemID = HexHelper.bytesToInt(target, 2, _SuppliesItem_Zhi_1_CurrPtr);//道具ID
+                    int Count = HexHelper.bytesToInt(target, 2, _SuppliesItem_Zhi_1_CurrPtr + 0x02);//数量
+
+                    //判断道具ID是否超限
+                    if (ItemID > cMax_ItemID)
+                    {
+                        Log.HexWar(_SuppliesItem_Zhi_1_CurrPtr, "支线1支援道具第" + i + "个,ID->{0}道具ID超出最大可能{1}，属于MHF道具【" + MHHelper.Get2MHFItemName(ItemID) + "】,将其修正为【不可燃烧的废物】ID->{2}", ItemID, cMax_ItemID, cModify_OutOfItemID);
+                        HexHelper.ModifyIntHexToBytes(target, cModify_OutOfItemID, _SuppliesItem_Zhi_1_CurrPtr, 2);
+                    }
+                    else
+                    {
+                        Log.HexColor(ConsoleColor.Green, _SuppliesItem_Zhi_1_CurrPtr, "支线1支援道具第" + i + "个主线，道具ID->{0} 【" + MHHelper.Get2DosItemName(ItemID) + "】 数量->{1}", ItemID, Count);
+                    }
+
+                    _SuppliesItem_Zhi_1_CurrPtr += 0x04;
+                }
+
+                int _SuppliesItem_Zhi_2_CurrPtr = _SuppliesItemPtr + 0x60 + 0x20;
+                for (int i = 0; i < 32; i++)
+                {
+                    //若遇到结束符或无数据
+                    if (MHHelper.CheckEnd(target, _SuppliesItem_Zhi_2_CurrPtr)
+                        ||
+                        HexHelper.bytesToInt(target, 1, _SuppliesItem_Zhi_2_CurrPtr) == 0
+                        )
+                    {
+                        Log.HexInfo(_SuppliesItem_Zhi_2_CurrPtr, "支线2支援道具，结束符");
+                        break;
+                    }
+
+                    int ItemID = HexHelper.bytesToInt(target, 2, _SuppliesItem_Zhi_2_CurrPtr);//道具ID
+                    int Count = HexHelper.bytesToInt(target, 2, _SuppliesItem_Zhi_2_CurrPtr + 0x02);//数量
+
+                    //判断道具ID是否超限
+                    if (ItemID > cMax_ItemID)
+                    {
+                        Log.HexWar(_SuppliesItem_Zhi_2_CurrPtr, "支线2支援道具第" + i + "个,ID->{0}道具ID超出最大可能{1}，属于MHF道具【" + MHHelper.Get2MHFItemName(ItemID) + "】,将其修正为【不可燃烧的废物】ID->{2}", ItemID, cMax_ItemID, cModify_OutOfItemID);
+                        HexHelper.ModifyIntHexToBytes(target, cModify_OutOfItemID, _SuppliesItem_Zhi_2_CurrPtr, 2);
+                    }
+                    else
+                    {
+                        Log.HexColor(ConsoleColor.Green, _SuppliesItem_Zhi_2_CurrPtr, "支线2支援道具第" + i + "个主线，道具ID->{0} 【" + MHHelper.Get2DosItemName(ItemID) + "】 数量->{1}", ItemID, Count);
+                    }
+
+                    _SuppliesItem_Zhi_2_CurrPtr += 0x04;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                target = null;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool FixItemPoint(byte[] src, out byte[] target)
+        {
+            try
+            {
+                target = HexHelper.CopyByteArr(src);//加载数据
+                //采集点指针
+                int _ItemPointPtr = HexHelper.bytesToInt(target, 4, 0x38);
+                Log.HexTips(0x38, "开始读取采集点指针,指针->{0}", _ItemPointPtr);
+
+                int _ItemPoint_CurrPtr = _ItemPointPtr;
+
+                for (int i = 0; i < 90; i++)
+                {
+                    //若遇到结束符或无数据
+                    if (MHHelper.CheckEnd(target, _ItemPoint_CurrPtr)
+                        ||
+                        HexHelper.bytesToInt(target, 1, _ItemPoint_CurrPtr) == 0
+                        )
+                    {
+                        Log.HexInfo(_ItemPoint_CurrPtr, "采集点结束");
+                        break;
+                    }
+
+                    int ItemStartPtr = HexHelper.bytesToInt(target, 4, _ItemPoint_CurrPtr);
+
+
+                    int ItemCurrPtr = ItemStartPtr;
+
+                    int setCount = 0;
+                    while (true)
+                    {
+                        //若遇到结束符或无数据
+                        if (MHHelper.CheckEnd(target, ItemCurrPtr)
+                            ||
+                            HexHelper.bytesToInt(target, 1, ItemCurrPtr) == 0
+                            )
+                        {
+                            Log.HexInfo(ItemCurrPtr, "第" + i + "个采集点，第" + setCount + "个素材 结束符");
+                            break;
+                        }
+                        int Pr = HexHelper.bytesToInt(target, 2, ItemCurrPtr);//概率
+                        int ItemID = HexHelper.bytesToInt(target, 2, ItemCurrPtr + 0x02);//道具ID
+
+                        //判断道具ID是否超限
+                        if (ItemID > cMax_ItemID)
+                        {
+                            Log.HexWar(ItemCurrPtr, "第" + i + "个采集点，第" + setCount + "个素材，ID->{0}道具ID超出最大可能{1}，属于MHF道具【" + MHHelper.Get2MHFItemName(ItemID) + "】,将其修正为【不可燃烧的废物】ID->{2}", ItemID, cMax_ItemID, cModify_OutOfItemID);
+                            HexHelper.ModifyIntHexToBytes(target, cModify_OutOfItemID, ItemCurrPtr + 0x02, 2);
+                        }
+                        else
+                        {
+                            Log.HexColor(ConsoleColor.Green, ItemCurrPtr, "第" + i + "个采集点，第" + setCount + "个素材，道具ID->{0} 【" + MHHelper.Get2DosItemName(ItemID) + "】 概率->{1}", ItemID, Pr);
+                        }
+                        setCount++;
+                        ItemCurrPtr += 0x04;
+                    }
+                    _ItemPoint_CurrPtr += 0x04;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                target = null;
+                return false;
+            }
+            return true;
+        }
+
+        public static bool FixFishGroupPoint(byte[] src, out byte[] target)
+        {
+            try
+            {
+                target = HexHelper.CopyByteArr(src);//加载数据
+                //鱼群指针
+                int _FishGroupPtr = HexHelper.bytesToInt(target, 4, 0x40);
+                Log.HexTips(0x40, "开始读取鱼群信息,指针->{0}", _FishGroupPtr);
+                int _FishGroup_CurrPtr = _FishGroupPtr;
+
+                int setFishGroup = 0;
+                //鱼群代号 循环
+                while (true)
+                {
+                    //鱼群代号结束符
+                    if (
+                        _FishGroup_CurrPtr >= target.Length
+                        ||
+                        MHHelper.CheckEnd(target, _FishGroup_CurrPtr)
+                        ||
+                        HexHelper.bytesToInt(target, 1, _FishGroup_CurrPtr) == 0
+                        )
+                    {
+                        Log.HexInfo(_FishGroup_CurrPtr, $"第{setFishGroup}鱼群代号 结束符");
+                        break;
+                    }
+
+                    //鱼群季节循环
+                    int _FishSeasonStartPtr = HexHelper.bytesToInt(target, 4, _FishGroup_CurrPtr);
+                    int _FishSeason_CurrPtr = _FishSeasonStartPtr;
+
+
+                    //鱼群季节循环
+                    for (int i = 0; i < 6; i++)
+                    {
+                        //鱼群代号结束符
+                        if (
+                            _FishSeason_CurrPtr >= target.Length
+                            ||
+                            MHHelper.CheckEnd(target, _FishSeason_CurrPtr)
+                            ||
+                            HexHelper.bytesToInt(target, 1, _FishSeason_CurrPtr) == 0
+                            )
+                        {
+                            Log.HexInfo(_FishSeason_CurrPtr, $"第{setFishGroup}鱼群代号 第{i}个季节昼夜 结束符");
+                            break;
+                        }
+
+                        int _FishStartPtr = HexHelper.bytesToInt(target, 4, _FishSeason_CurrPtr);
+                        int _FishStart_CurrPtr = _FishStartPtr;
+
+                        int setFish = 0;
+                        while (true)
+                        {
+                            //鱼群代号结束符
+                            if (
+                                _FishStart_CurrPtr >= target.Length
+                                ||
+                                MHHelper.CheckEnd(target, _FishStart_CurrPtr)
+                                ||
+                                HexHelper.bytesToInt(target, 1, _FishStart_CurrPtr) == 0
+                                )
+                            {
+                                Log.HexInfo(_FishStart_CurrPtr, $"第{setFishGroup}鱼群代号 第{i}个季节昼夜 第" + setFish + "个鱼 结束符");
+                                break;
+                            }
+
+                            int Pr = HexHelper.bytesToInt(target, 1, _FishStart_CurrPtr);//概率
+                            int FishID = HexHelper.bytesToInt(target, 1, _FishStart_CurrPtr + 0x01);//鱼ID
+
+                            //判断道具ID是否超限
+                            if (FishID > cMax_FishID)
+                            {
+                                Log.HexWar(_FishStart_CurrPtr, "第" + setFishGroup + "鱼群，第" + i + "个季节昼夜，第" + setFish + "个鱼 鱼ID->{0} 超出2Dos最大值{1}，修正为【刺身鱼】{2}", FishID, cMax_FishID, cModify_OutOfFishID);
+                                HexHelper.ModifyIntHexToBytes(target, cModify_OutOfFishID, _FishStart_CurrPtr + 0x01, 1);
+                            }
+                            else
+                            {
+                                Log.HexColor(ConsoleColor.Green, _FishStart_CurrPtr, "第" + setFishGroup + "鱼群，第" + i + "个季节昼夜，第" + setFish + "个鱼 鱼ID->{0}【"+MHHelper.Get2DosFishName(FishID)+"】 概率->{1}", FishID, Pr);
+                            }
+
+                            setFish++;
+                            _FishStart_CurrPtr += 0x02;
+                        }
+
+                        _FishSeason_CurrPtr += 0x08;
+                    }
+
+                    setFishGroup++;
+                    _FishGroup_CurrPtr += 0x04;
+                }
 
             }
             catch (Exception ex)
