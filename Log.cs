@@ -8,8 +8,10 @@ namespace MHFQuestToMH2Dos
 {
     public static class Log
     {
+        static bool bShowHex = true;
         public static void HexInfo(long HexPos,string log, params long[] arr)
         {
+            if(!bShowHex) return;
             log = "0x" + HexPos.ToString("X") + ":" +log;
             if(arr != null)
             {
@@ -26,6 +28,7 @@ namespace MHFQuestToMH2Dos
 
         public static void HexTips(long HexPos, string log, params long[] arr)
         {
+            if (!bShowHex) return;
             ConsoleColor src_color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
             HexInfo(HexPos, log, arr);
@@ -34,6 +37,7 @@ namespace MHFQuestToMH2Dos
 
         public static void HexWar(long HexPos, string log, params long[] arr)
         {
+            if (!bShowHex) return;
             ConsoleColor src_color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
             HexInfo(HexPos, log, arr);
@@ -42,6 +46,7 @@ namespace MHFQuestToMH2Dos
 
         public static void HexColor(ConsoleColor color,long HexPos, string log, params long[] arr)
         {
+            if (!bShowHex) return;
             ConsoleColor src_color = Console.ForegroundColor;
             Console.ForegroundColor = color;
             HexInfo(HexPos, log, arr);

@@ -34,6 +34,8 @@ namespace MHFQuestToMH2Dos
         public static Dictionary<int, MapAreaData> DictMapAreaData = new Dictionary<int, MapAreaData>();
         public static Dictionary<int, string> DictMapIDFileName = new Dictionary<int, string>();
         public static Dictionary<int, string> DictMapIDFullFileName = new Dictionary<int, string>();
+        public static Dictionary<int, string> DictGutiName = new Dictionary<int, string>();
+        public static Dictionary<int, string> DictStarName = new Dictionary<int, string>();
         public static bool LoadMapTemplateAreaData(byte[] src,string FileName,string FullFileName)
         {
             byte[] target;
@@ -133,6 +135,35 @@ namespace MHFQuestToMH2Dos
             return true;
         }
 
+        public static bool LoadMaxGuti(byte[] src)
+        {
+            try
+            {
+                byte[] target = HexHelper.CopyByteArr(src);//加载数据
+
+                //从前4字节取出指针 定位任务信息位置
+                int _QuestInfoPtr = HexHelper.bytesToInt(target, 4, 0x00);
+                //从前4字节取出指针 定位任务信息位置
+                int _QuestContentPtr = HexHelper.bytesToInt(target, 4, _QuestInfoPtr + 36);
+                int _QuestNametPtr = HexHelper.bytesToInt(target, 4, _QuestContentPtr);
+                string QuestName = HexHelper.ReadBytesToString(src, _QuestNametPtr);
+
+                //固体值
+                int _GuTiValue = HexHelper.bytesToInt(target, 4, 0x48);
+                DictGutiName[_GuTiValue] = QuestName;
+
+
+                //任务星 尝试处理方案
+                int _QuestStart = HexHelper.bytesToInt(target, 1, _QuestInfoPtr + ModifyQuest.cQuestInfo_Star_Offset);
+                DictStarName[_QuestStart] = QuestName;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
 
         public static Dictionary<string, int> DictTimeTypeCount = new Dictionary<string, int>();
         public static void GetModeType(byte[] src,string FileName)

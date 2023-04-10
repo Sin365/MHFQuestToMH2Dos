@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MHFQuestToMH2Dos
 {
@@ -65,7 +66,26 @@ namespace MHFQuestToMH2Dos
                     errcount_temp++;
                     //Console.WriteLine($">>>>>>>>>>>>>>成功失败 第{index_temp}个");
                 }
+
+
+                //LoadToSaveTemplate.LoadMaxGuti(data);
+
             }
+
+            //int[] gutikeys = LoadToSaveTemplate.DictGutiName.Keys.ToArray();
+            //gutikeys = gutikeys.OrderBy(w => w).ToArray();
+            //foreach (var k in gutikeys)
+            //{
+            //    Log.HexInfo(k, "任务" + LoadToSaveTemplate.DictGutiName[k] + ",固体值{0}", k);
+            //}
+
+            //int[] gutikeys = LoadToSaveTemplate.DictStarName.Keys.ToArray();
+            //gutikeys = gutikeys.OrderBy(w => w).ToArray();
+            //foreach (var k in gutikeys)
+            //{
+            //    Log.HexInfo(k, "任务" + LoadToSaveTemplate.DictStarName[k] + ",星{0}", k);
+            //}
+
 
             Console.WriteLine($"-----------原数据读取完毕-----------");
 
@@ -103,7 +123,7 @@ namespace MHFQuestToMH2Dos
                 else
                 {
                     errcount++;
-                    Console.WriteLine($">>>>>>>>>>>>>>处理失败 第{index}个: 输出到{files[i]}");
+                    Console.WriteLine($">>>>>>>>>>>>>>处理失败 第{index}个");
                 }
             }
 

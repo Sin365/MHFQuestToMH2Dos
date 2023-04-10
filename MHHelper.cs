@@ -22,11 +22,17 @@ namespace MHFQuestToMH2Dos
 
         public static bool CheckEnd(byte[] data, int Ptr)
         {
+            if (Ptr < 0)
+                return true;
+            if (data.Length <= Ptr + 1)
+                return true;
             return HexHelper.bytesToUInt(data, 2, Ptr) == 0xFFFF;
         }
 
         public static bool CheckEndWith1Byte(byte[] data, int Ptr)
         {
+            if (data.Length <= Ptr)
+                return true;
             return HexHelper.bytesToUInt(data, 1, Ptr) == 0xFF;
         }
 
