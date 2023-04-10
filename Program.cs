@@ -10,7 +10,7 @@ namespace MHFQuestToMH2Dos
         const string InDir = "Input";
         const string OutDir = "Out";
         const string PosFile2DosDir = "PosFile2Dos";
-        const string Ver = "0.3.0";
+        const string Ver = "0.3.1";
 
         static void Main(string[] args)
         {
