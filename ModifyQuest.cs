@@ -17,7 +17,8 @@ namespace MHFQuestToMH2Dos
         public const int cMax_GuTi = 0x16;
         public const int cMax_QuestStar = 8;
 
-        public const int cModify_QuestID = 0xEA74;
+        //public const int cModify_QuestID = 0xEA74;
+        public static int cModify_QuestID = 0xEA60;
 
         /// <summary>
         /// 道具ID超出最大限制时，修改为【不可燃烧的废物】
@@ -110,8 +111,9 @@ namespace MHFQuestToMH2Dos
         /// </summary>
         public const int cQuestInfo_QuestID_Lenght = 2;
 
-        public static bool ModifyQuset(byte[] src, out byte[] target)
+        public static bool ModifyQuset(byte[] src, out byte[] target, out int targetQuestID)
         {
+            targetQuestID = 0;
             target = HexHelper.CopyByteArr(src);//加载数据
 
             if (ModifyFileOffset(target, out byte[] out_ModifyFileOffset))
@@ -122,9 +124,10 @@ namespace MHFQuestToMH2Dos
                 target = out_ModifyTextOffset;
             else { return false; }
 
-            if (ModifyQuestMap(target, out byte[] out_ModifyQuestMap))
+            if (ModifyQuestMap(target, out byte[] out_ModifyQuestMap, out int _targetQuestID))
                 target = out_ModifyQuestMap;
             else { return false; }
+            targetQuestID = _targetQuestID;
 
             if (ModifyQuestBOSS(target, out byte[] out_ModifyQuestBOSS))
                 target = out_ModifyQuestBOSS;
@@ -151,6 +154,22 @@ namespace MHFQuestToMH2Dos
             else { return false; }
 
             return true;
+        }
+
+        public static Dictionary<int, int> SrcQuestID2FixID = new Dictionary<int, int>();
+        public static int UnUseQuestID_Index = 0;
+        public static int GetNextFixQuestID(int Id)
+        {
+            if (!SrcQuestID2FixID.ContainsKey(Id))
+            {
+                int idx = ++UnUseQuestID_Index;
+                if (idx > MHHelper.UnUseQuestID.Count - 1)
+                {
+                    idx = UnUseQuestID_Index = 0;
+                }
+                SrcQuestID2FixID[Id] = MHHelper.UnUseQuestID[idx];
+            }
+            return SrcQuestID2FixID[Id];
         }
 
         public static bool ModifyFileOffset(byte[] src, out byte[] target)
@@ -387,7 +406,7 @@ namespace MHFQuestToMH2Dos
             }
         }
 
-        public static bool ModifyQuestMap(byte[] src, out byte[] target)
+        public static bool ModifyQuestMap(byte[] src, out byte[] target,out int targetQuestID)
         {
             try
             {
@@ -472,11 +491,14 @@ namespace MHFQuestToMH2Dos
 
 
                 uint _QuestID = HexHelper.bytesToUInt(target, cQuestInfo_QuestID_Lenght, _QuestInfoPtr + cQuestInfo_QuestID_Offset);
+                targetQuestID = (int)_QuestID;
                 Log.HexTips(_QuestInfoPtr + cQuestInfo_QuestID_Offset, "任务编号【{0}】", _QuestID);
                 if (_QuestID < 60000)
                 {
-                    HexHelper.ModifyIntHexToBytes(target, cModify_QuestID, _QuestInfoPtr + cQuestInfo_QuestID_Offset, cQuestInfo_QuestID_Lenght);
-                    Log.HexTips(_QuestInfoPtr + cQuestInfo_QuestID_Offset, "任务编号【{0}】小于60000，修正为【{1}】,使其可下载", _QuestID, cModify_QuestID);
+                    int targetID = GetNextFixQuestID((int)_QuestID);
+                    targetQuestID = targetID;
+                    HexHelper.ModifyIntHexToBytes(target, targetID, _QuestInfoPtr + cQuestInfo_QuestID_Offset, cQuestInfo_QuestID_Lenght);
+                    Log.HexTips(_QuestInfoPtr + cQuestInfo_QuestID_Offset, "任务编号【{0}】小于60000，修正为【{1}】,使其可下载", _QuestID, targetID);
                 }
 
                 //从前4字节取出指针 定位任务信息位置
@@ -508,6 +530,7 @@ namespace MHFQuestToMH2Dos
             {
                 Console.WriteLine(ex);
                 target = null;
+                targetQuestID = 0;
                 return false;
             }
         }

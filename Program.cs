@@ -10,7 +10,7 @@ namespace MHFQuestToMH2Dos
         const string InDir = "Input";
         const string OutDir = "Out";
         const string PosFile2DosDir = "PosFile2Dos";
-        const string Ver = "0.3.1";
+        const string Ver = "0.3.2";
 
         static void Main(string[] args)
         {
@@ -110,9 +110,9 @@ namespace MHFQuestToMH2Dos
 
                 Console.WriteLine($">>>>>>>>>>>>>>开始处理 第{index}个文件  {FileName}<<<<<<<<<<<<<<<<<<<");
                 FileHelper.LoadFile(files[i], out byte[] data);
-                if (ModifyQuest.ModifyQuset(data, out byte[] targetdata))
+                if (ModifyQuest.ModifyQuset(data, out byte[] targetdata, out int targetQuestID))
                 {
-                    string newfileName = FileName + "_fix";
+                    string newfileName = FileName + "_fix_toid_"+ targetQuestID;
                     string outstring = loc + OutDir + "\\" + newfileName;
 
                     //LoadToSaveTemplate.GetModeType(targetdata, FileName);
